@@ -7,7 +7,7 @@ import pandas as pd
 import plotly.express as px
 from dash.dependencies import Input, Output
 
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
 # Load data
 data = pd.read_csv('E:\Excelr-P269-Internship-Project-Group2-OIl-Price-Prediction-And-Forecasting-Using-Python\oil_prices_yahoo1.csv')
@@ -27,19 +27,16 @@ app.layout = html.Div([
         html.Span(' | '),
         dcc.Link('Time Series Map', href='/time-series-map'),
         html.Span(' | '),
-        dcc.Link('Bar Chart', href='/bar-chart'),
+        dcc.Link('Monthly Bar Chart', href='/Monthly-bar-chart'),
+        html.Span(' | '),
+        dcc.Link('Yearly Bar Chart', href='/Yearly-bar-chart'),
     ], className='navbar'),
-    html.Br(),
-    html.Label('Color 1:'),
-    dcc.Input(id='color-1', type='text', value='#004A7F'),
-    html.Br(),
-    html.Label('Color 2:'),
-    dcc.Input(id='color-2', type='text', value='#0094FF'),
-    html.Br(),
     html.Div(id='page-content')
 ], style={'font-family': 'Helvetica'})
 
-
+app.css.append_css({
+    'external_url': 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'
+})
 index_page = html.Div([
     html.H1('Home'),
     dash_table.DataTable(
@@ -50,7 +47,9 @@ index_page = html.Div([
     html.Br(),
     dcc.Link('Go to Time Series Map', href='/time-series-map'),
     html.Br(),
-    dcc.Link('Go to Bar Chart', href='/bar-chart'),
+    dcc.Link('Go to Monthly Bar Chart', href='/Monthly-bar-chart'),
+    html.Br(),
+    dcc.Link('Go to Yearly Bar Chart', href='/Yearly-bar-chart'),
 ])
 
 time_series_map_page = html.Div([
@@ -124,52 +123,38 @@ def update_time_series_map_explanation(id):
 
 @app.callback(Output('page-content', 'children'),
               Input('url', 'pathname'))
-@app.callback(Output('page-content', 'children'),
-              Input('url', 'pathname'))
+yearly_bar_chart_page = html.Div([
+    html.H1('Yearly Bar Chart'),
+    dcc.Graph(id='yearly-bar-chart'),
+    dcc.Link('Go to Time Series Map', href='/time-series-map'),
+    html.Br(),
+    dcc.Link('Go to Monthly Bar Chart', href='/Monthly-bar-chart'),
+    html.Br(),
+    dcc.Link('Go back to home', href='/')
+])
+@app.callback(
+    Output('yearly-bar-chart', 'figure'),
+    Input('yearly-bar-chart', 'id')
+)
+def update_yearly_bar_chart(id):
+    # Convert the Date column to a datetime object
+    df['Date'] = pd.to_datetime(df['Date'])
+
+    # Group the data by year and calculate the mean price for each year
+    yearly_data = df.groupby(pd.Grouper(key='Date', freq='Y')).mean().reset_index()
+
+    # Create the interactive bar chart
+    fig = px.bar(yearly_data, x='Date', y='Price', title='Yearly Bar Chart')
+
+    return fig
+
 def display_page(pathname):
-    if pathname == '/page-1':
-        return page_1
-    elif pathname == '/page-2':
-        return page_2
+    if pathname == '/time-series-map':
+        return time_series_map_page
+    elif pathname == '/bar-chart':
+        return bar_chart_page
     else:
-        return home_page
-
-@app.callback(Output('app-css', 'href'),
-              Input('color-1', 'value'), Input('color-2', 'value'))
-def update_css(color1, color2):
-    css = f"""
-.navbar {{
-  overflow: hidden;
-  background-color: #333;
-}}
-
-.navbar a {{
-  float: left;
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
-  font-size: 17px;
-}}
-
-.navbar a:hover {{
-  background-color: #111;
-}}
-
-@keyframes glowing {{
-  0% {{ background-color: {color1}; box-shadow: 0 0 5px {color1}; }}
-  50% {{ background-color: {color2}; box-shadow: 0 0 20px {color2}; }}
-  100% {{ background-color: {color1}; box-shadow: 0 0 5px {color1}; }}
-}}
-
-.navbar a {{
-    animation: glowing 1300ms infinite;
-}}
-"""
-    with open('assets/glowing-navbar.css', 'w') as f:
-        f.write(css)
-    return '/assets/glowing-navbar.css'
+        return index_page
 
 if __name__ == '__main__':
     app.run_server(debug=True)
