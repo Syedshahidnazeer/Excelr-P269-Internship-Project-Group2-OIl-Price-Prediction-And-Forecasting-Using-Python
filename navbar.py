@@ -10,7 +10,7 @@ from dash.dependencies import Input, Output
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
 # Load data
-data = pd.read_csv('/oil_prices_yahoo1.csv.csv')
+data = pd.read_csv('/oil_prices_yahoo1.csv')
 # covertnig the date column to datetime using pandas
 data['Date'] = pd.to_datetime(data['Date'], errors='coerce')
 
