@@ -10,7 +10,7 @@ from dash.dependencies import Input, Output
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
 # Load data
-data = pd.read_csv('/oil_prices_yahoo1.csv.csv')
+data = pd.read_csv('E:\Excelr-P269-Internship-Project-Group2-OIl-Price-Prediction-And-Forecasting-Using-Python\oil_prices_yahoo1.csv')
 # covertnig the date column to datetime using pandas
 data['Date'] = pd.to_datetime(data['Date'], errors='coerce')
 
@@ -27,7 +27,9 @@ app.layout = html.Div([
         html.Span(' | '),
         dcc.Link('Time Series Map', href='/time-series-map'),
         html.Span(' | '),
-        dcc.Link('Bar Chart', href='/bar-chart'),
+        dcc.Link('Monthly Bar Chart', href='/Monthly-bar-chart'),
+        html.Span(' | '),
+        dcc.Link('Yearly Bar Chart', href='/Yearly-bar-chart'),
     ], className='navbar'),
     html.Div(id='page-content')
 ], style={'font-family': 'Helvetica'})
@@ -45,7 +47,9 @@ index_page = html.Div([
     html.Br(),
     dcc.Link('Go to Time Series Map', href='/time-series-map'),
     html.Br(),
-    dcc.Link('Go to Bar Chart', href='/bar-chart'),
+    dcc.Link('Go to Monthly Bar Chart', href='/Monthly-bar-chart'),
+    html.Br(),
+    dcc.Link('Go to Yearly Bar Chart', href='/Yearly-bar-chart'),
 ])
 
 time_series_map_page = html.Div([
@@ -53,7 +57,9 @@ time_series_map_page = html.Div([
     dcc.Graph(id='time-series-map'),
     html.P(id='time-series-map-explanation'),
     html.Br(),
-    dcc.Link('Go to Bar Chart', href='/bar-chart'),
+    dcc.Link('Go to Monthly Bar Chart', href='/Monthly-bar-chart'),
+    html.Br(),
+    dcc.Link('Go to Yearly Bar Chart', href='/Yearly-bar-chart'),
     html.Br(),
     dcc.Link('Go back to home', href='/')
 ])
@@ -63,8 +69,10 @@ time_series_map_page = html.Div([
     Input('time-series-map', 'id')
 )
 @app.callback(
-    Output('bar-chart', 'figure'),
-    Input('bar-chart', 'id')
+    Output('Monthly-bar-chart', 'figure'),
+    Input('Monthly-
+    
+    bar-chart', 'id')
 )
 def update_graph(id):
     # Create the interactive time series map
