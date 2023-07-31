@@ -10,7 +10,11 @@ from dash.dependencies import Input, Output
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
 # Load data
+<<<<<<< HEAD:Deployment/navbar.py
 data = pd.read_csv('E:\Excelr-P269-Internship-Project-Group2-OIl-Price-Prediction-And-Forecasting-Using-Python\oil_prices_yahoo1.csv')
+=======
+data = pd.read_csv('/oil_prices_yahoo1.csv')
+>>>>>>> 3db7ef499f1040ebc55d32ad085ba04c8fe18b3f:navbar.py
 # covertnig the date column to datetime using pandas
 data['Date'] = pd.to_datetime(data['Date'], errors='coerce')
 
