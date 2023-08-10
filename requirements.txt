@@ -3,3 +3,4 @@ pandas
 gunicorn
 dash_table
 plotly
+prophet
