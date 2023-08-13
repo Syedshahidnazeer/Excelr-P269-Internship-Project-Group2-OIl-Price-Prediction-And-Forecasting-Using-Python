@@ -2,16 +2,18 @@ from dash import dcc, html
 from dash.dependencies import Input, Output
 import dash
 import pandas as pd
-import pickle
+from joblib import load
 import plotly.express as px
 from prophet import Prophet
 from datetime import datetime, timedelta
 
+# Load the saved Prophet model
+
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
-# Load the saved Prophet model
-with open('prophet_model_11k.pkl', 'rb') as model_file:
-    model = pickle.load(model_file)
+# Load the saved Prophet model using joblib
+model_filename = 'E:\Excelr-P269-Internship-Project-Group2-OIl-Price-Prediction-And-Forecasting-Using-Python\models\prophet_model.joblib'
+model = load(model_filename)
 
 external_css = ['/assets/background1.css']  # Adjust the path to your CSS file
 
@@ -20,19 +22,30 @@ app.layout = html.Div([
     html.Div(id='page-content')
 ] + [html.Link(rel='stylesheet', href=css) for css in external_css])
 
-# Define the CSS classes for styling
-css_classes = {
-    'page_1_container': 'page-1-container',
-    'predict_button_container': 'predict-button-container',
-    'go_to_page_2': 'go-to-page-2'
-}
-
 # Page 1 Layout
 page_1_layout = html.Div(
-    className=css_classes['page_1_container'],
+    style={
+        'background-image': 'url("/assets/background1.css")',  # Replace with your image path
+        'background-size': 'cover',  # Scale the image to cover the entire container
+        'background-repeat': 'no-repeat',  # Prevent the image from repeating
+        'display': 'flex',
+        'flex-direction': 'column',  # Set flex-direction to column
+        'justify-content': 'center',  # Center vertically
+        'align-items': 'center',  # Center horizontally
+        'height': '100vh',
+        'animation': 'changeColor 10s infinite alternate'  # CSS animation
+    },
     children=[
         html.Div(
-            className=css_classes['predict_button_container'],
+            style={
+                'display': 'flex',
+                'flex-direction': 'column',
+                'align-items': 'center',
+                'padding': '20px',  # Add dynamic padding here
+                'background-color': 'rgba(255, 255, 255, 0.8)',  # Semi-transparent white background
+                'border-radius': '8px',
+                'box-shadow': '0 2px 4px rgba(0, 0, 0, 0.1)'  # Shadow
+            },
             children=[
                 dcc.DatePickerSingle(
                     id='date-picker',
@@ -44,7 +57,6 @@ page_1_layout = html.Div(
                         'background-color': '#ffd700',  # Background color
                         'border': 'none',
                         'border-radius': '8px',  # Rounded corners
-                        'box-shadow': '0 2px 4px rgba(0, 0, 0, 0.1)',  # Shadow
                         'color': '#333',  # Text color
                         'cursor': 'pointer'
                     },
@@ -54,11 +66,26 @@ page_1_layout = html.Div(
                     id='predict-button',
                     n_clicks=0,
                     style={'background-color': '#007BFF', 'color': 'white', 'border': 'none', 'padding': '10px 20px', 'cursor': 'pointer'}
-                )
+                ),
+                html.Div(id='output-div', style={'margin-top': '20px', 'font-size': '18px', 'color': 'black'})  # Set the color here
             ]
         ),
-        html.Div(id='output-div', style={'margin-top': '20px', 'font-size': '18px', 'color': 'black'}),
-        dcc.Link('Go to Page 2', href='/page-2', className=css_classes['go_to_page_2'])
+        dcc.Link(
+            'Go to Page 2',
+            href='/page-2',
+            style={
+                'color': 'blue',
+                'text-decoration': 'none',
+                'align-self': 'center',  # Align link to the center
+                'border': '2px solid #007BFF',
+                'border-radius': '8px',
+                'padding': '10px',
+                'background-color': '#007BFF',
+                'color': 'white',
+                'cursor': 'pointer',
+                'transition': 'background-color 0.3s'
+            }
+        ),
     ]
 )
 
@@ -81,52 +108,48 @@ def predict_price(n_clicks, selected_date):
             html.Span(f" is {predicted_price:.2f}$", style={'color': 'blue'})  # Add color to the price
         ]
     return ""
-
 # Layout for Page 2
-page_2_layout = html.Div(
-    className='page-2-container',  # Apply the CSS class to the entire container
-    children=[
-        html.H2('Select Forecast Duration', style={'text-align': 'center', 'margin-bottom': '20px'}),
-        dcc.Dropdown(
-            id='forecast-duration-dropdown',
-            options=[
-                {'label': '1 Year', 'value': 1},
-                {'label': '2 Years', 'value': 2},
-                {'label': '3 Years', 'value': 3},
-                {'label': '5 Years', 'value': 5},
-                {'label': '10 Years', 'value': 10}
-            ],
-            value=1,
-            style={'width': '100%', 'margin-bottom': '20px'}
-        ),
-        dcc.Graph(id='forecast-graph', style={'height': '400px'})  # Placeholder for the forecasting graph
-    ],
-    style={
-        'max-width': '800px',
-        'margin': '0 auto',
-        'padding': '20px',
-        'border': '1px solid #ddd',
-        'border-radius': '10px',
-        'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.1)',
-        'animation': 'changeColor 10s infinite alternate'  # CSS animation
-    }
-)
-
-@app.callback(
-    Output('forecast-duration-dropdown', 'style'),
-    [Input('forecast-duration-dropdown', 'value')]
-)
-def update_dropdown_color(selected_value):
-    colors = ['red', 'green', 'blue', 'orange', 'purple']  # Add more colors if needed
-    selected_color = colors[selected_value - 1]
-    dropdown_style = {
-        'width': '100%',
-        'margin-bottom': '20px',
-        'background-color': selected_color,
-        'color': 'white'
-    }
-    return dropdown_style
-
+page_2_layout = html.Div([
+    html.H2('Select Forecast Duration', style={'text-align': 'center', 'margin-bottom': '20px'}),
+    dcc.Dropdown(
+        id='forecast-duration-dropdown',
+        options=[
+            {'label': '1 Year', 'value': 1},
+            {'label': '2 Years', 'value': 2},
+            {'label': '3 Years', 'value': 3},
+            {'label': '5 Years', 'value': 5},
+            {'label': '10 Years', 'value': 10}
+        ],
+        value=1,
+        style={'width': '100%', 'margin-bottom': '20px'}
+    ),
+    dcc.Graph(id='forecast-graph', style={'height': '400px'}),  # Placeholder for the forecasting graph
+    dcc.Link(
+        'Go to Page 1',  # Link text
+        href='/',  # Link to Page 1
+        style={
+            'color': 'blue',
+            'text-decoration': 'none',
+            'align-self': 'center',  # Align link to the center
+            'border': '2px solid #007BFF',
+            'border-radius': '8px',
+            'padding': '10px',
+            'background-color': '#007BFF',
+            'color': 'white',
+            'cursor': 'pointer',
+            'transition': 'background-color 0.3s',
+            'margin-top': '20px'  # Add margin to create space between the graph and the link
+        }
+    ),
+], style={
+    'max-width': '800px',
+    'margin': '0 auto',
+    'padding': '20px',
+    'border': '1px solid #ddd',
+    'border-radius': '10px',
+    'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.1)',
+    'animation': 'changeColor 10s infinite alternate'  # CSS animation
+}, className='dynamic-background')
 
 # Callback to update the forecasting graph based on user selection
 @app.callback(

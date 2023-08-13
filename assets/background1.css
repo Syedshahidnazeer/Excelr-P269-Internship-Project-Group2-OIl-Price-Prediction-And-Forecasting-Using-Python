@@ -1,0 +1,21 @@
+@keyframes changeColor {
+  0% {
+    background-color: #FF5733;
+  }
+  25% {
+    background-color: #33FF57;
+  }
+  50% {
+    background-color: #5733FF;
+  }
+  75% {
+    background-color: #FF3357;
+  }
+  100% {
+    background-color: #33FFBB;
+  }
+}
+
+.dynamic-background {
+  animation: changeColor 10s infinite alternate;
+}
