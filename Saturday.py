@@ -8,25 +8,56 @@ from prophet import Prophet
 from datetime import datetime, timedelta
 
 # Load the saved Prophet model
-
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
 # Load the saved Prophet model using joblib
 model_filename = 'E:\Excelr-P269-Internship-Project-Group2-OIl-Price-Prediction-And-Forecasting-Using-Python\models\prophet_model.joblib'
 model = load(model_filename)
 
-external_css = ['/assets/background1.css']  # Adjust the path to your CSS file
+external_css = ['/assets/background1.css', '/assets/styles.css']  # Add path to styles.css
 
+# Create the navigation bar layout
+nav_bar = html.Div([
+    dcc.Link('Oil_Price_Prediction', id='page-1-link', href='/page-1', className='nav-link'),
+    dcc.Link('Oil_Price_Prediction_Yearly', id='page-2-link', href='/page-2', className='nav-link'),
+    dcc.Link('Graphs and Charts', id='page-3-link', href='/page-3', className='nav-link'),
+], className='nav-bar-container')
+
+# Wrap the navigation bar inside a container
+nav_bar_container = html.Div(nav_bar, className='nav-bar-container')
+
+# Add callback to dynamically set background color based on active page
+@app.callback(
+    Output('page-1-link', 'style'),
+    Output('page-2-link', 'style'),
+    Output('page-3-link', 'style'),
+    Input('url', 'pathname')
+)
+def set_active_page_style(pathname):
+    page_styles = [{'margin-right': '10px', 'background-color': '#00ffff'}] * 3
+    
+    if pathname == '/page-1':
+        page_styles[0]['background-color'] = '#FF0000'  # Set color for active page
+    elif pathname == '/page-2':
+        page_styles[1]['background-color'] = '#00FF00'  # Set color for active page
+    elif pathname == '/page-3':
+        page_styles[2]['background-color'] = '#0000FF'  # Set color for active page
+    
+    return page_styles
+
+# Add the navigation bar container to the layout
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
+    nav_bar_container,  # Include the navigation bar container
     html.Div(id='page-content')
 ] + [html.Link(rel='stylesheet', href=css) for css in external_css])
+
 
 # Page 1 Layout
 page_1_layout = html.Div(
     style={
-        'background-image': 'url("/assets/background1.css")',  # Replace with your image path
-        'background-size': 'cover',  # Scale the image to cover the entire container
+        'background-image': 'url("/assets/background.jpg")',  # Replace with your image path
+        'background-size': '100% 100%',  # Scale the image to cover the entire container
         'background-repeat': 'no-repeat',  # Prevent the image from repeating
         'display': 'flex',
         'flex-direction': 'column',  # Set flex-direction to column
@@ -71,7 +102,7 @@ page_1_layout = html.Div(
             ]
         ),
         dcc.Link(
-            'Go to Page 2',
+            'Go to Oil_Price_Prediction_Yearly',
             href='/page-2',
             style={
                 'color': 'blue',
@@ -86,8 +117,26 @@ page_1_layout = html.Div(
                 'transition': 'background-color 0.3s'
             }
         ),
+        dcc.Link(
+            'Go to Graphs and Visualizations',  # Link text
+            href='/page-3',  # Link to Page 3
+            style={
+                'color': 'blue',
+                'text-decoration': 'none',
+                'align-self': 'center',  # Align link to the center
+                'border': '2px solid #007BFF',
+                'border-radius': '8px',
+                'padding': '10px',
+                'background-color': '#007BFF',
+                'color': 'white',
+                'cursor': 'pointer',
+                'transition': 'background-color 0.3s',
+                'margin-top': '20px'  # Add margin to create space between the link and other elements
+            }
+        ),
     ]
 )
+
 
 # Predict price callback function
 @app.callback(
@@ -108,8 +157,6 @@ def predict_price(n_clicks, selected_date):
             html.Span(f" is {predicted_price:.2f}$", style={'color': 'blue'})  # Add color to the price
         ]
     return ""
-
-# Layout for Page 2
 # Layout for Page 2
 page_2_layout = html.Div([
     html.H2('Select Forecast Duration', style={'text-align': 'center', 'margin-bottom': '20px'}),
@@ -127,7 +174,7 @@ page_2_layout = html.Div([
     ),
     dcc.Graph(id='forecast-graph', style={'height': '400px'}),  # Placeholder for the forecasting graph
     dcc.Link(
-        'Go to Page 1',  # Link text
+        'Go to Oil_Price_Prediction',  # Link text
         href='/',  # Link to Page 1
         style={
             'color': 'blue',
@@ -143,6 +190,23 @@ page_2_layout = html.Div([
             'margin-top': '20px'  # Add margin to create space between the graph and the link
         }
     ),
+    dcc.Link(
+        'Go to Graphs and Visualizations',  # Link text
+        href='/page-3',  # Link to Page 3
+        style={
+            'color': 'blue',
+            'text-decoration': 'none',
+            'align-self': 'center',  # Align link to the center
+            'border': '2px solid #007BFF',
+            'border-radius': '8px',
+            'padding': '10px',
+            'background-color': '#007BFF',
+            'color': 'white',
+            'cursor': 'pointer',
+            'transition': 'background-color 0.3s',
+            'margin-top': '20px'  # Add margin to create space between the link and other elements
+        }
+    ),
 ], style={
     'max-width': '800px',
     'margin': '0 auto',
@@ -152,6 +216,7 @@ page_2_layout = html.Div([
     'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.1)',
     'animation': 'changeColor 10s infinite alternate'  # CSS animation
 }, className='dynamic-background')
+
 
 
 
@@ -180,11 +245,69 @@ def update_forecast_graph(selected_duration):
     fig = px.line(forecast, x='Date', y='Price', title=f'Forecasted Prices for {selected_duration} Years')
     return fig
 
+# Layout for Page 3
+page_3_layout = html.Div([
+    html.H2('Image Containers with Comments', style={'text-align': 'center', 'margin-bottom': '20px'}),
+    html.Div([
+        html.Div([
+            html.Img(src='/assets/image1.jpg', style={'width': '100%'}),
+            html.P(" This graph compares two data sets, Data 1 (raw data) and Data 2 (cleaned data), over time from 2005 to 2025. The x-axis represents the date and the y-axis represents the price. The highest point on the graph is 145.2899932861328 for Data 1 and the lowest point is 37.63000016815234 for Data 2")
+        ], className='image-container'),
+        html.Div([
+            html.Img(src='/assets/image2.jpg', style={'width': '100%'}),
+            html.P("We can see that there are outliers in the raw data and no outliers in the cleaned data , this cleaning process was done by recoding the outliers above the upper fence with the upper fence value and below lower fence with lower fence values using iqr capping techinique")
+        ], className='image-container'),
+        html.Div([
+        html.Img(src='/assets/image4.png', style={'width': '100%'}),
+        html.P("This is the python code for removing outliers using IQR capping method")
+        ], className='image-container'),
+        html.Div([
+        html.Img(src='/assets/image5.png', style={'width': '100%'}),
+        html.P("We can see that there are no outliers in our data for now as shown in the above box plot")
+        ], className='image-container'),
+        html.Div([
+        html.Img(src='/assets/image6.png', style={'width': '100%'}),
+        html.P("We had our data non-stationary.so, we made it stationary in order to apply the forecasting models")
+        ], className='image-container'),
+        html.Div([
+        html.Img(src='/assets/image3.jpg', style={'width': '100%'}),
+        html.P("Cause of lower rmse score we went with prophet model for our prediction")
+        ], className='image-container'),
+    ], className='image-container-wrapper'),
+    dcc.Link(
+        'Go to Oil_Price_Prediction',  # Link text
+        href='/',  # Link to Page 1
+        style={
+            'color': 'blue',
+            'text-decoration': 'none',
+            'align-self': 'center',  # Align link to the center
+            'border': '2px solid #007BFF',
+            'border-radius': '8px',
+            'padding': '10px',
+            'background-color': '#007BFF',
+            'color': 'white',
+            'cursor': 'pointer',
+            'transition': 'background-color 0.3s',
+            'margin-top': '20px'  # Add margin to create space between the containers and the link
+        }
+    ),
+], style={
+    'max-width': '800px',
+    'margin': '0 auto',
+    'padding': '20px',
+    'border': '1px solid #ddd',
+    'border-radius': '10px',
+    'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.1)',
+    'animation': 'changeColor 10s infinite alternate'  # CSS animation
+}, className='dynamic-background')
+
 # Update page content based on URL
 @app.callback(Output('page-content', 'children'), Input('url', 'pathname'))
 def display_page(pathname):
     if pathname == '/page-2':
         return page_2_layout
+    elif pathname == '/page-3':
+        return page_3_layout
     else:
         return page_1_layout
 
