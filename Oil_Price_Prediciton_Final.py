@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 app = dash.Dash(__name__, suppress_callback_exceptions=True)
 
 # Load the saved Prophet model using joblib
-model_filename = 'E:\Excelr-P269-Internship-Project-Group2-OIl-Price-Prediction-And-Forecasting-Using-Python\models\prophet_model.joblib'
+model_filename = 'models\prophet_model.joblib'
 model = load(model_filename)
 
 external_css = ['/assets/background1.css']  # Adjust the path to your CSS file
