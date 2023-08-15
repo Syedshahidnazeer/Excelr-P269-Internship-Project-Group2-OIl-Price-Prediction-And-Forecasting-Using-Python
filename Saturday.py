@@ -217,9 +217,6 @@ page_2_layout = html.Div([
     'animation': 'changeColor 10s infinite alternate'  # CSS animation
 }, className='dynamic-background')
 
-
-
-
 # Callback to update the forecasting graph based on user selection
 @app.callback(
     Output('forecast-graph', 'figure'),
